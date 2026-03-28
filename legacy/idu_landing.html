@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idu — найди компанию</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f2ec;
+    --accent: #ff4d1c;
+    --accent2: #ffd166;
+    --gray: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: rgba(245,242,236,0.1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Onest', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: normal;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(255,77,28,0.5);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 48px;
+    mix-blend-mode: normal;
+  }
+  .nav-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: -0.03em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    padding: 10px 24px;
+    font-family: 'Onest', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 100px;
+    cursor: none;
+    transition: transform 0.2s, background 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .nav-cta:hover { transform: scale(1.04); background: #ff6235; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(255,77,28,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,209,102,0.06) 0%, transparent 50%);
+  }
+
+  .hero-noise {
+    position: absolute; inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .hero-tag {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: clamp(56px, 10vw, 120px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s forwards;
+  }
+  .hero-title .line2 { color: var(--accent); }
+  .hero-title .line3 {
+    -webkit-text-stroke: 1px rgba(245,242,236,0.3);
+    color: transparent;
+  }
+
+  .hero-bottom {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s forwards;
+  }
+
+  .hero-desc {
+    max-width: 360px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(245,242,236,0.6);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: var(--white);
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: none;
+    border: none;
+    transition: transform 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { transform: scale(1.03); background: #ff6235; }
+  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
+  .btn-primary:hover .btn-arrow { transform: translateX(4px); }
+
+  .hero-note {
+    font-size: 12px;
+    color: rgba(245,242,236,0.3);
+    letter-spacing: 0.02em;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s 1.2s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, rgba(245,242,236,0.4), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .scroll-text { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(245,242,236,0.3); }
+
+  /* MARQUEE */
+  .marquee-section {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+    overflow: hidden;
+    background: var(--gray);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 0;
+    animation: marquee 20s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 32px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(245,242,236,0.4);
+  }
+  .marquee-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* HOW IT WORKS */
+  .section {
+    padding: 120px 48px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 56px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .step {
+    background: var(--gray);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .step:hover { background: #222; }
+  .step-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(245,242,236,0.04);
+    line-height: 1;
+    position: absolute;
+    top: 24px; right: 24px;
+    letter-spacing: -0.05em;
+  }
+  .step-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,77,28,0.12);
+    border: 1px solid rgba(255,77,28,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+  .step-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+  .step-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(245,242,236,0.5);
+  }
+
+  /* FEATURES */
+  .features-section {
+    padding: 0 48px 120px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .feature-card {
+    background: var(--gray);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card:hover { background: #1e1e1e; }
+  .feature-card.big {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .feature-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .feature-tag-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .feature-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(245,242,236,0.5);
+  }
+
+  .feature-visual {
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Mock phone */
+  .phone-mock {
+    width: 220px;
+    background: #111;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 32px;
+    padding: 20px 16px;
+    position: relative;
+  }
+  .phone-notch {
+    width: 80px; height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    margin: 0 auto 18px;
+  }
+  .event-card-mock {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 8px;
+  }
+  .ecm-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-bottom: 8px;
+    font-family: 'Onest', sans-serif;
+  }
+  .ecm-tag.sport { background: rgba(29,158,117,0.2); color: #5DCAA5; }
+  .ecm-tag.cinema { background: rgba(127,119,221,0.2); color: #AFA9EC; }
+  .ecm-title { font-size: 12px; font-weight: 500; color: var(--white); margin-bottom: 4px; font-family: 'Onest', sans-serif; }
+  .ecm-meta { font-size: 10px; color: rgba(245,242,236,0.4); margin-bottom: 10px; font-family: 'Onest', sans-serif; }
+  .ecm-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 10px;
+    padding: 6px;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+    cursor: none;
+  }
+  .ecm-avatars { display: flex; gap: -4px; margin-bottom: 6px; }
+  .ecm-ava {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px solid #111;
+    margin-right: -5px;
+    font-size: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+  }
+
+  /* PREMIUM */
+  .premium-section {
+    padding: 0 48px 120px;
+  }
+  .premium-card {
+    background: var(--accent);
+    border-radius: 24px;
+    padding: 72px 64px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .premium-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,255,255,0.1) 0%, transparent 60%);
+  }
+  .premium-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(10,10,10,0.5);
+    margin-bottom: 20px;
+  }
+  .premium-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    color: var(--black);
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .premium-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(10,10,10,0.6);
+    margin-bottom: 32px;
+  }
+  .btn-dark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--black);
+    color: var(--white);
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: none;
+    border: none;
+    transition: transform 0.2s;
+    text-decoration: none;
+  }
+  .btn-dark:hover { transform: scale(1.03); }
+
+  .premium-perks {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .perk {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(10,10,10,0.08);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .perk-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .perk-text { font-size: 14px; color: var(--black); font-weight: 500; }
+  .perk-sub { font-size: 12px; color: rgba(10,10,10,0.5); margin-top: 2px; }
+
+  /* CATEGORIES */
+  .categories-section {
+    padding: 0 48px 120px;
+  }
+  .categories-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gray);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: none;
+  }
+  .cat-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255,77,28,0.06);
+  }
+  .cat-emoji { font-size: 16px; }
+
+  /* STATS */
+  .stats-section {
+    padding: 0 48px 120px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .stat-card {
+    background: var(--gray);
+    padding: 56px 40px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 64px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 14px;
+    color: rgba(245,242,236,0.4);
+    line-height: 1.5;
+  }
+
+  /* CTA FINAL */
+  .final-section {
+    padding: 120px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,77,28,0.1) 0%, transparent 70%);
+  }
+  .final-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .final-title .accent { color: var(--accent); }
+  .final-sub {
+    font-size: 16px;
+    color: rgba(245,242,236,0.5);
+    max-width: 480px;
+    margin: 0 auto 48px;
+    line-height: 1.7;
+    position: relative;
+  }
+  .final-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--white);
+    padding: 16px 32px;
+    border-radius: 100px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: none;
+    border: 1px solid rgba(245,242,236,0.15);
+    transition: border-color 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { border-color: rgba(245,242,236,0.4); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-links {
+    display: flex; gap: 32px;
+  }
+  .footer-links a {
+    font-size: 13px;
+    color: rgba(245,242,236,0.3);
+    text-decoration: none;
+    transition: color 0.2s;
+    cursor: none;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(245,242,236,0.2);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Tg button */
+  .tg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,242,236,0.06);
+    border: 1px solid rgba(245,242,236,0.1);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: rgba(245,242,236,0.6);
+    cursor: none;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+  .tg-badge:hover { background: rgba(245,242,236,0.1); }
+  .tg-icon { color: #2AABEE; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">idu<span>.</span></div>
+  <button class="nav-cta">Попробовать бесплатно</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-noise"></div>
+
+  <div class="hero-tag">Социальная платформа для активностей · СНГ</div>
+
+  <h1 class="hero-title">
+    Хочешь<br>
+    <span class="line2">куда-то</span><br>
+    <span class="line3">пойти?</span>
+  </h1>
+
+  <div class="hero-bottom">
+    <p class="hero-desc">
+      Создай событие или присоединись к чужому. Бег, кино, поход — находи людей с теми же планами прямо сейчас.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn-primary">
+        Найти компанию
+        <span class="btn-arrow">→</span>
+      </a>
+      <span class="hero-note">Вход через Telegram · бесплатно</span>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Скролл</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="marquee-dot"></span>Спорт</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Кино</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Походы</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Еда</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Настолки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Концерты</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Велопрогулки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Йога</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Спорт</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Кино</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Походы</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Еда</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Настолки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Концерты</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Велопрогулки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Йога</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-label reveal">Как это работает</div>
+  <div class="steps">
+    <div class="step reveal">
+      <span class="step-num">01</span>
+      <div class="step-icon">👤</div>
+      <h3 class="step-title">Создай аккаунт</h3>
+      <p class="step-desc">Войди через Telegram за 10 секунд. Укажи что тебе интересно — и лента сразу подстроится.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:0.1s">
+      <span class="step-num">02</span>
+      <div class="step-icon">🗓</div>
+      <h3 class="step-title">Найди или создай ивент</h3>
+      <p class="step-desc">Фильтруй по типу, дате и месту. Или сам создай событие — публичное или приватное.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:0.2s">
+      <span class="step-num">03</span>
+      <div class="step-icon">🔥</div>
+      <h3 class="step-title">Иди и знакомься</h3>
+      <p class="step-desc">Жми «Иду» — попадаешь в чат с участниками. Просто, без лишних шагов.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-label reveal">Возможности</div>
+  <div class="features-grid">
+
+    <div class="feature-card big reveal">
+      <div>
+        <div class="feature-tag"><span class="feature-tag-dot"></span>Главное</div>
+        <h3 class="feature-title">Лента событий рядом с тобой</h3>
+        <p class="feature-desc">Фильтруй по типу активности, дате, городу и стоимости. Видишь только то, что тебе подходит — сегодня, сейчас, рядом.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="phone-mock">
+          <div class="phone-notch"></div>
+          <div class="event-card-mock">
+            <div class="ecm-tag sport">Спорт</div>
+            <p class="ecm-title">Пробежка в парке</p>
+            <p class="ecm-meta">Сб 8:00 · Лошицкий · 4/8 чел.</p>
+            <div class="ecm-avatars">
+              <div class="ecm-ava" style="background:#1D9E75;color:#fff;">А</div>
+              <div class="ecm-ava" style="background:#7F77DD;color:#fff;">М</div>
+              <div class="ecm-ava" style="background:#D85A30;color:#fff;">К</div>
+            </div>
+            <button class="ecm-btn">Иду →</button>
+          </div>
+          <div class="event-card-mock">
+            <div class="ecm-tag cinema">Кино</div>
+            <p class="ecm-title">Дюна 3 · Мираж</p>
+            <p class="ecm-meta">Пт 19:30 · 2/4 чел. · бесплатно</p>
+            <button class="ecm-btn">Иду →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-tag"><span class="feature-tag-dot"></span>Чат</div>
+      <h3 class="feature-title">Чат сразу в Telegram</h3>
+      <p class="feature-desc">Нажал «Иду» — получил ссылку на группу. Никаких лишних аккаунтов, просто Telegram который уже у всех есть.</p>
+    </div>
+
+    <div class="feature-card reveal" style="transition-delay:0.1s">
+      <div class="feature-tag"><span class="feature-tag-dot"></span>Профиль</div>
+      <h3 class="feature-title">Твоя история активностей</h3>
+      <p class="feature-desc">Созданные ивенты, посещённые события, сохранённые люди. Рейтинг который растёт с каждым выходом.</p>
+    </div>
+
+    <div class="feature-card reveal">
+      <div class="feature-tag"><span class="feature-tag-dot"></span>Приватность</div>
+      <h3 class="feature-title">Публичные и приватные ивенты</h3>
+      <p class="feature-desc">Хочешь — открытое событие для всех. Хочешь — приватное только для своих с доступом по ссылке.</p>
+    </div>
+
+    <div class="feature-card reveal" style="transition-delay:0.1s">
+      <div class="feature-tag"><span class="feature-tag-dot"></span>Гибкость</div>
+      <h3 class="feature-title">Платные и бесплатные события</h3>
+      <p class="feature-desc">Укажи стоимость участия — для платных ивентов, мастер-классов или совместных поездок. Или ставь 0 и зови всех.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories-section">
+  <div class="section-label reveal">Категории</div>
+  <div class="categories-grid reveal">
+    <div class="cat-pill"><span class="cat-emoji">🏃</span> Бег и фитнес</div>
+    <div class="cat-pill"><span class="cat-emoji">🎬</span> Кино</div>
+    <div class="cat-pill"><span class="cat-emoji">⛺</span> Походы</div>
+    <div class="cat-pill"><span class="cat-emoji">🍜</span> Еда</div>
+    <div class="cat-pill"><span class="cat-emoji">🎲</span> Настолки</div>
+    <div class="cat-pill"><span class="cat-emoji">🚴</span> Велопрогулки</div>
+    <div class="cat-pill"><span class="cat-emoji">🎵</span> Концерты</div>
+    <div class="cat-pill"><span class="cat-emoji">🧘</span> Йога</div>
+    <div class="cat-pill"><span class="cat-emoji">🎨</span> Творчество</div>
+    <div class="cat-pill"><span class="cat-emoji">🏊</span> Плавание</div>
+    <div class="cat-pill"><span class="cat-emoji">📚</span> Книжный клуб</div>
+    <div class="cat-pill"><span class="cat-emoji">➕</span> И многое другое</div>
+  </div>
+</section>
+
+<!-- PREMIUM -->
+<section class="premium-section">
+  <div class="premium-card reveal">
+    <div class="premium-bg"></div>
+    <div style="position:relative;">
+      <p class="premium-label">Idu Premium</p>
+      <h2 class="premium-title">Больше событий.<br>Больше людей.</h2>
+      <p class="premium-desc">Снимай лимиты и организуй столько ивентов, сколько хочешь — с любым количеством участников.</p>
+      <button class="btn-dark">Попробовать · от $2/мес <span style="font-size:18px;">→</span></button>
+    </div>
+    <div class="premium-perks" style="position:relative;">
+      <div class="perk">
+        <span class="perk-icon">∞</span>
+        <div>
+          <p class="perk-text">Неограниченные ивенты</p>
+          <p class="perk-sub">Без лимита на одновременные события</p>
+        </div>
+      </div>
+      <div class="perk">
+        <span class="perk-icon">👥</span>
+        <div>
+          <p class="perk-text">Больше участников</p>
+          <p class="perk-sub">Снимай ограничение на количество мест</p>
+        </div>
+      </div>
+      <div class="perk">
+        <span class="perk-icon">⚡</span>
+        <div>
+          <p class="perk-text">Продвижение в ленте</p>
+          <p class="perk-sub">Твои ивенты выше в выдаче</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card reveal">
+      <div class="stat-num">10+</div>
+      <p class="stat-label">категорий<br>активностей</p>
+    </div>
+    <div class="stat-card reveal" style="transition-delay:0.1s">
+      <div class="stat-num">0₽</div>
+      <p class="stat-label">чтобы начать<br>и найти компанию</p>
+    </div>
+    <div class="stat-card reveal" style="transition-delay:0.2s">
+      <div class="stat-num">СНГ</div>
+      <p class="stat-label">доступно везде<br>где есть ты</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-section">
+  <div class="final-bg"></div>
+  <h2 class="final-title reveal">
+    Хватит<br>
+    ходить<br>
+    <span class="accent">одному</span>
+  </h2>
+  <p class="final-sub reveal">Первый шаг простой — войди через Telegram и посмотри что происходит рядом прямо сейчас.</p>
+  <div class="final-actions reveal">
+    <a href="#" class="btn-primary">
+      Найти ивент
+      <span class="btn-arrow">→</span>
+    </a>
+    <a href="#" class="tg-badge">
+      <span class="tg-icon">✈</span>
+      Наш Telegram
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">idu<span>.</span></div>
+  <div class="footer-links">
+    <a href="#">О проекте</a>
+    <a href="#">Для бизнеса</a>
+    <a href="#">Поддержка</a>
+  </div>
+  <div class="footer-copy">© 2025 Idu</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('button, a, .cat-pill').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '18px';
+      cursor.style.height = '18px';
+      ring.style.width = '54px';
+      ring.style.height = '54px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '10px';
+      cursor.style.height = '10px';
+      ring.style.width = '36px';
+      ring.style.height = '36px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => obs.observe(r));
+</script>
+</body>
+</html>

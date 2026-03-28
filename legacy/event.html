@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пробежка в Лошицком парке — Idu</title>
+<meta name="description" content="Утренняя пробежка 5 км по парку. Присоединяйся!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --bg-secondary: #F6F7F8;
+    --text: #1B1B1B;
+    --text-secondary: #6B7280;
+    --accent: #FF4D1C;
+    --accent-hover: #E8441A;
+    --accent-light: rgba(255, 77, 28, 0.06);
+    --accent-light-2: rgba(255, 77, 28, 0.10);
+    --border: #E5E7EB;
+    --radius: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --green-bg: rgba(16, 185, 129, 0.10);
+    --green-text: #059669;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Onest', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 48px;
+  }
+
+  .nav-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-family: 'Onest', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+  .btn-ghost:hover {
+    border-color: #CDD0D5;
+    background: var(--bg-secondary);
+  }
+
+  .btn-accent {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #FFFFFF;
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-family: 'Onest', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    text-decoration: none;
+  }
+  .btn-accent:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  /* EVENT HEADER */
+  .event-header {
+    padding: 48px 48px 40px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    background: var(--green-bg);
+    color: var(--green-text);
+  }
+
+  .event-title {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  .meta-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+  }
+
+  .organizer-line {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .organizer-line strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .price-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--green-bg);
+    color: var(--green-text);
+  }
+
+  /* MAIN CONTENT */
+  .event-content {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 48px 64px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 48px;
+    align-items: start;
+  }
+
+  /* LEFT COLUMN */
+  .event-description h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .event-description p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .info-section {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+
+  .info-section h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .info-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  .info-list li .info-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .info-list li strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* RIGHT COLUMN — STICKY CARD */
+  .sidebar-card {
+    position: sticky;
+    top: 88px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+  }
+
+  .participants-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .participants-count {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .participants-count span {
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: #F0F1F3;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 50%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.6s ease;
+  }
+
+  .participants-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .participant {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .participant-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .participant-name {
+    font-weight: 500;
+  }
+
+  .participant-role {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .btn-idu {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Onest', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    margin-bottom: 8px;
+  }
+  .btn-idu:hover {
+    background: var(--accent-hover);
+    transform: scale(1.01);
+  }
+
+  .btn-idu-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  .btn-share {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Onest', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-share:hover {
+    background: var(--bg-secondary);
+    border-color: #CDD0D5;
+  }
+
+  /* BOTTOM BANNER */
+  .bottom-banner {
+    background: var(--accent-light);
+    padding: 56px 48px;
+  }
+
+  .bottom-banner-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .bottom-banner h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .bottom-banner-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 100%;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .footer-logo span { color: var(--accent); }
+
+  .footer-links {
+    display: flex;
+    gap: 32px;
+  }
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+
+  .footer-copy {
+    font-size: 12px;
+    color: #9CA3AF;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--bg);
+    border-radius: 20px;
+    padding: 40px 36px 36px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.16);
+    animation: slideUp 0.3s ease;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    color: var(--text-secondary);
+    font-size: 18px;
+  }
+  .modal-close:hover {
+    background: #ECEDEF;
+  }
+
+  .modal h3 {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    color: var(--text);
+    padding-right: 32px;
+  }
+
+  .modal p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .modal-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .btn-telegram {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Onest', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-telegram:hover { background: var(--accent-hover); }
+
+  .btn-apple {
+    width: 100%;
+    padding: 14px;
+    background: var(--text);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Onest', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-apple:hover { background: #333; }
+
+  .modal-login-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .modal-login-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .modal-login-link a:hover {
+    text-decoration: underline;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 860px) {
+    nav {
+      padding: 14px 20px;
+    }
+    .nav-right .btn-ghost {
+      display: none;
+    }
+    .event-header {
+      padding: 32px 20px 28px;
+    }
+    .event-title {
+      font-size: 26px;
+    }
+    .event-meta {
+      gap: 16px;
+    }
+    .event-content {
+      grid-template-columns: 1fr;
+      padding: 0 20px 48px;
+      gap: 32px;
+    }
+    .sidebar-card {
+      position: static;
+    }
+    .bottom-banner {
+      padding: 40px 20px;
+    }
+    footer {
+      padding: 24px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .footer-links {
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .event-meta {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .bottom-banner-actions {
+      flex-direction: column;
+    }
+    .bottom-banner-actions .btn-accent,
+    .bottom-banner-actions .btn-ghost {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="idu_landing.html" class="nav-logo">idu<span>.</span></a>
+  <div class="nav-right">
+    <a href="#" class="btn-ghost">Войти</a>
+    <a href="#" class="btn-accent">Скачать приложение</a>
+  </div>
+</nav>
+
+<!-- EVENT HEADER -->
+<section class="event-header fade-in">
+  <div class="category-pill">
+    <span>&#127939;</span> Спорт
+  </div>
+
+  <h1 class="event-title">Пробежка в Лошицком парке</h1>
+
+  <div class="event-meta">
+    <div class="meta-item">
+      <svg class="meta-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="14" height="14" rx="2"/>
+        <line x1="3" y1="8" x2="17" y2="8"/>
+        <line x1="7" y1="2" x2="7" y2="5"/>
+        <line x1="13" y1="2" x2="13" y2="5"/>
+      </svg>
+      Суббота, 5 апреля &middot; 8:00
+    </div>
+    <div class="meta-item">
+      <svg class="meta-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 11a3 3 0 100-6 3 3 0 000 6z"/>
+        <path d="M10 18s-6-5.35-6-10a6 6 0 1112 0c0 4.65-6 10-6 10z"/>
+      </svg>
+      Лошицкий парк, Минск
+    </div>
+  </div>
+
+  <div class="organizer-line">Организатор: <strong>Антон</strong></div>
+
+  <div class="price-badge">Бесплатно</div>
+</section>
+
+<!-- MAIN CONTENT -->
+<div class="event-content">
+  <!-- LEFT -->
+  <div class="event-left fade-in">
+    <div class="event-description">
+      <h2>Описание</h2>
+      <p>
+        Утренняя пробежка 5 км по парку. Темп комфортный, подходит для начинающих. После пробежки — кофе в ближайшей кофейне. Берите кроссовки и хорошее настроение!
+      </p>
+    </div>
+
+    <div class="info-section">
+      <h3>Что нужно знать</h3>
+      <ul class="info-list">
+        <li>
+          <span class="info-dot"></span>
+          <span><strong>Темп:</strong> 6:00 - 6:30 / км</span>
+        </li>
+        <li>
+          <span class="info-dot"></span>
+          <span><strong>Дистанция:</strong> 5 км</span>
+        </li>
+        <li>
+          <span class="info-dot"></span>
+          <span><strong>Уровень:</strong> любой</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="event-right fade-in">
+    <div class="sidebar-card">
+      <div class="participants-header">
+        <div class="participants-count">4 <span>из 8 мест</span></div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+
+      <ul class="participants-list">
+        <li class="participant">
+          <div class="participant-avatar" style="background: #FFE8E0; color: var(--accent);">А</div>
+          <div>
+            <span class="participant-name">Антон</span>
+            <span class="participant-role">организатор</span>
+          </div>
+        </li>
+        <li class="participant">
+          <div class="participant-avatar" style="background: #E0F2FE; color: #0284C7;">М</div>
+          <div>
+            <span class="participant-name">Мария</span>
+          </div>
+        </li>
+        <li class="participant">
+          <div class="participant-avatar" style="background: #EDE9FE; color: #7C3AED;">Д</div>
+          <div>
+            <span class="participant-name">Дмитрий</span>
+          </div>
+        </li>
+        <li class="participant">
+          <div class="participant-avatar" style="background: #FEF3C7; color: #D97706;">К</div>
+          <div>
+            <span class="participant-name">Катя</span>
+          </div>
+        </li>
+      </ul>
+
+      <button class="btn-idu" id="btnIdu">Иду &rarr;</button>
+      <div class="btn-idu-hint">Нужен аккаунт &middot; вход через Telegram</div>
+
+      <button class="btn-share" id="btnShare">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10a2 2 0 100-4 2 2 0 000 4z"/>
+          <path d="M12 5a2 2 0 100-4 2 2 0 000 4z"/>
+          <path d="M12 15a2 2 0 100-4 2 2 0 000 4z"/>
+          <line x1="5.7" y1="9.1" x2="10.3" y2="11.9"/>
+          <line x1="10.3" y1="4.1" x2="5.7" y2="6.9"/>
+        </svg>
+        Поделиться
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BANNER -->
+<section class="bottom-banner fade-in">
+  <div class="bottom-banner-inner">
+    <h2>Хочешь присоединиться? Создай аккаунт за 10 секунд</h2>
+    <div class="bottom-banner-actions">
+      <a href="#" class="btn-accent" style="padding: 14px 32px; font-size: 15px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.81-1.6 4.6-1.87 5.12-1.88.11 0 .37.03.53.17.14.12.18.28.2.45-.01.06.01.24 0 .38z"/></svg>
+        Войти через Telegram
+      </a>
+      <a href="#" class="btn-ghost">Скачать приложение</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">idu<span>.</span></div>
+  <div class="footer-links">
+    <a href="#">О проекте</a>
+    <a href="#">Telegram</a>
+    <a href="#">Поддержка</a>
+    <a href="#">Конфиденциальность</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 idu. Все права защищены.</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <h3>Присоединяйся!</h3>
+    <p>Чтобы присоединиться к событию, войди через Telegram или Apple</p>
+    <div class="modal-buttons">
+      <button class="btn-telegram">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.81-1.6 4.6-1.87 5.12-1.88.11 0 .37.03.53.17.14.12.18.28.2.45-.01.06.01.24 0 .38z"/></svg>
+        Войти через Telegram
+      </button>
+      <button class="btn-apple">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Войти через Apple
+      </button>
+    </div>
+    <div class="modal-login-link">
+      Уже есть аккаунт? <a href="#">Войти</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fade-in animation on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Modal
+  const modal = document.getElementById('modalOverlay');
+  const btnIdu = document.getElementById('btnIdu');
+  const modalClose = document.getElementById('modalClose');
+
+  btnIdu.addEventListener('click', () => {
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Share button
+  document.getElementById('btnShare').addEventListener('click', async () => {
+    const shareData = {
+      title: 'Пробежка в Лошицком парке',
+      text: 'Утренняя пробежка 5 км. Присоединяйся!',
+      url: window.location.href
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        const btn = document.getElementById('btnShare');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 4 6 12 3 9"/></svg> Скопировано';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      }
+    } catch (err) {}
+  });
+</script>
+
+</body>
+</html>

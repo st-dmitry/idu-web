@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Idu — найди компанию</title>
+<meta name="description" content="Idu — приложение для поиска компании на активности: бег, кино, походы, еда и многое другое в СНГ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --bg-alt: #F6F7F8;
+    --text: #1B1B1B;
+    --text-secondary: #6B7280;
+    --accent: #FF4D1C;
+    --accent-hover: #E8441A;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.1);
+    --border: #E5E7EB;
+    --surface: #FFFFFF;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Onest', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ===================== NAV ===================== */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-cta {
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    padding: 12px 26px;
+    font-family: 'Onest', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .nav-cta:hover { transform: scale(1.02); background: var(--accent-hover); }
+
+  /* ===================== HERO ===================== */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 800px; height: 800px;
+    top: -200px; right: -100px;
+    background: radial-gradient(circle, rgba(255,77,28,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+
+  .hero-content {
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-tag {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+
+  .hero-title {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .hero-title .accent { color: var(--accent); }
+
+  .hero-desc {
+    max-width: 440px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .hero-note {
+    font-size: 13px;
+    color: var(--text-secondary);
+    letter-spacing: 0.01em;
+  }
+
+  .hero-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.5s forwards;
+  }
+
+  /* ===================== BUTTONS ===================== */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #FFFFFF;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: 'Onest', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary:hover { transform: scale(1.02); background: var(--accent-hover); }
+  .btn-arrow { font-size: 18px; transition: transform 0.2s; }
+  .btn-primary:hover .btn-arrow { transform: translateX(4px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: 'Onest', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, border-color 0.2s, color 0.2s;
+    text-decoration: none;
+  }
+  .btn-ghost:hover { border-color: #C0C4CC; transform: scale(1.02); }
+
+  .btn-dark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--text);
+    color: #FFFFFF;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-family: 'Onest', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s;
+    text-decoration: none;
+  }
+  .btn-dark:hover { transform: scale(1.02); }
+
+  /* ===================== PHONE MOCKUP ===================== */
+  .phone-mock {
+    width: 260px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 36px;
+    padding: 24px 18px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .phone-notch {
+    width: 80px; height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    margin: 0 auto 20px;
+  }
+  .event-card-mock {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--card-shadow);
+  }
+  .ecm-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+  }
+  .ecm-tag.sport { background: rgba(29,158,117,0.12); color: #15803D; }
+  .ecm-tag.cinema { background: rgba(127,119,221,0.12); color: #6D5DD3; }
+  .ecm-tag.food { background: rgba(234,88,12,0.12); color: #C2410C; }
+  .ecm-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; font-family: 'Onest', sans-serif; }
+  .ecm-meta { font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; font-family: 'Onest', sans-serif; }
+  .ecm-btn {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 11px;
+    padding: 7px;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .ecm-btn:hover { background: var(--accent-hover); }
+  .ecm-avatars { display: flex; margin-bottom: 8px; }
+  .ecm-ava {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--surface);
+    margin-right: -5px;
+    font-size: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+    color: #FFFFFF;
+  }
+
+  /* ===================== MARQUEE ===================== */
+  .marquee-section {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+    overflow: hidden;
+    background: var(--bg-alt);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 0;
+    animation: marquee 25s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee-item {
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 32px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .marquee-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+  @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  /* ===================== SECTIONS ===================== */
+  .section {
+    padding: 100px 48px;
+    max-width: 1296px;
+    margin: 0 auto;
+  }
+  .section--alt {
+    background: var(--bg-alt);
+  }
+  .section--alt .section {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .section-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 48px;
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 500;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    width: 28px; height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  /* ===================== HOW IT WORKS ===================== */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .step {
+    background: var(--surface);
+    padding: 40px 36px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+    box-shadow: var(--card-shadow);
+  }
+  .step:hover { box-shadow: var(--card-shadow-hover); }
+  .step-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 64px;
+    font-weight: 900;
+    color: rgba(0,0,0,0.03);
+    line-height: 1;
+    position: absolute;
+    top: 16px; right: 20px;
+    letter-spacing: -0.05em;
+  }
+  .step-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,77,28,0.08);
+    border: 1px solid rgba(255,77,28,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+  .step-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .step-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  /* ===================== FEATURES ===================== */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    padding: 40px 36px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+    box-shadow: var(--card-shadow);
+  }
+  .feature-card:hover { box-shadow: var(--card-shadow-hover); }
+  .feature-card.big {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .feature-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .feature-tag-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .feature-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+
+  .feature-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .feature-visual {
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ===================== CATEGORIES ===================== */
+  .categories-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .cat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .cat-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255,77,28,0.04);
+  }
+  .cat-emoji { font-size: 16px; }
+
+  /* ===================== PREMIUM ===================== */
+  .premium-section {
+    padding: 0 48px 100px;
+    max-width: 1296px;
+    margin: 0 auto;
+  }
+  .premium-card {
+    background: var(--accent);
+    border-radius: 20px;
+    padding: 64px 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .premium-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 100% 50%, rgba(255,255,255,0.12) 0%, transparent 60%);
+  }
+  .premium-label {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .premium-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: #FFFFFF;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .premium-desc {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 32px;
+  }
+  .premium-perks {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .perk {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .perk-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .perk-text { font-size: 14px; color: #FFFFFF; font-weight: 500; }
+  .perk-sub { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+  /* ===================== STATS ===================== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 36px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.3s;
+  }
+  .stat-card:hover { box-shadow: var(--card-shadow-hover); }
+  .stat-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ===================== FINAL CTA ===================== */
+  .final-section {
+    padding: 100px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,77,28,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .final-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.0;
+    margin-bottom: 24px;
+    position: relative;
+    color: var(--text);
+  }
+  .final-title .accent { color: var(--accent); }
+  .final-sub {
+    font-size: 17px;
+    color: var(--text-secondary);
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+    position: relative;
+  }
+  .final-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+    flex-wrap: wrap;
+  }
+
+  .tg-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 14px 24px;
+    font-family: 'Onest', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-decoration: none;
+  }
+  .tg-badge:hover { background: #EEEEF0; border-color: #C0C4CC; }
+  .tg-icon { color: #2AABEE; font-size: 16px; }
+
+  /* ===================== FOOTER ===================== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1296px;
+    margin: 0 auto;
+  }
+  .footer-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-links {
+    display: flex; gap: 32px;
+  }
+  .footer-links a {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* ===================== ANIMATIONS ===================== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===================== RESPONSIVE ===================== */
+  @media (max-width: 960px) {
+    nav { padding: 16px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual { order: -1; }
+    .hero-title { font-size: clamp(30px, 7vw, 48px); }
+
+    .section { padding: 80px 24px; }
+    .section-wrap { padding: 0 24px; }
+
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card.big { grid-column: span 1; grid-template-columns: 1fr; }
+    .feature-card.big .feature-visual { order: -1; }
+
+    .premium-section { padding: 0 24px 80px; }
+    .premium-card { grid-template-columns: 1fr; padding: 40px 32px; gap: 32px; }
+    .premium-title { font-size: 28px; }
+
+    .stats-grid { grid-template-columns: 1fr; }
+    .stat-num { font-size: 44px; }
+
+    .final-section { padding: 80px 24px; }
+    .final-title { font-size: clamp(30px, 7vw, 56px); }
+
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 24px; }
+    .footer-links { gap: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .nav-cta { font-size: 12px; padding: 10px 18px; }
+    .hero-desc { font-size: 15px; }
+    .phone-mock { width: 220px; }
+    .categories-grid { gap: 8px; }
+    .cat-pill { padding: 10px 18px; font-size: 13px; }
+    .final-actions { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">idu<span>.</span></div>
+  <button class="nav-cta">Попробовать бесплатно</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-tag">Найди компанию для любой активности</div>
+      <h1 class="hero-title">
+        Хочешь<br>
+        куда-то<br>
+        <span class="accent">пойти?</span>
+      </h1>
+      <p class="hero-desc">
+        Создай событие или присоединись к чужому. Бег, кино, поход — находи людей с теми же планами прямо сейчас.
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">
+          Найти компанию
+          <span class="btn-arrow">→</span>
+        </a>
+        <span class="hero-note">Вход через Telegram · бесплатно</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-mock">
+        <div class="phone-notch"></div>
+        <div class="event-card-mock">
+          <div class="ecm-tag sport">Спорт</div>
+          <p class="ecm-title">Пробежка в парке</p>
+          <p class="ecm-meta">Сб 8:00 · Лошицкий · 4/8 чел.</p>
+          <div class="ecm-avatars">
+            <div class="ecm-ava" style="background:#1D9E75;">А</div>
+            <div class="ecm-ava" style="background:#7F77DD;">М</div>
+            <div class="ecm-ava" style="background:#D85A30;">К</div>
+          </div>
+          <button class="ecm-btn">Иду →</button>
+        </div>
+        <div class="event-card-mock">
+          <div class="ecm-tag cinema">Кино</div>
+          <p class="ecm-title">Дюна 3 · Мираж</p>
+          <p class="ecm-meta">Пт 19:30 · 2/4 чел. · бесплатно</p>
+          <button class="ecm-btn">Иду →</button>
+        </div>
+        <div class="event-card-mock">
+          <div class="ecm-tag food">Еда</div>
+          <p class="ecm-title">Фо-бо на Зыбицкой</p>
+          <p class="ecm-meta">Вс 13:00 · 3/6 чел.</p>
+          <button class="ecm-btn">Иду →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="marquee-dot"></span>Спорт</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Кино</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Походы</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Еда</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Настолки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Концерты</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Велопрогулки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Йога</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Спорт</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Кино</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Походы</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Еда</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Настолки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Концерты</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Велопрогулки</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Йога</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-label reveal">Как это работает</div>
+  <div class="steps">
+    <div class="step reveal">
+      <span class="step-num">01</span>
+      <div class="step-icon">👤</div>
+      <h3 class="step-title">Создай аккаунт</h3>
+      <p class="step-desc">Войди через Telegram за 10 секунд. Укажи что тебе интересно — и лента сразу подстроится.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:0.1s">
+      <span class="step-num">02</span>
+      <div class="step-icon">🗓</div>
+      <h3 class="step-title">Найди или создай ивент</h3>
+      <p class="step-desc">Фильтруй по типу, дате и месту. Или сам создай событие — публичное или приватное.</p>
+    </div>
+    <div class="step reveal" style="transition-delay:0.2s">
+      <span class="step-num">03</span>
+      <div class="step-icon">🔥</div>
+      <h3 class="step-title">Иди и знакомься</h3>
+      <p class="step-desc">Жми «Иду» — попадаешь в чат с участниками. Просто, без лишних шагов.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="section--alt">
+  <section class="section">
+    <div class="section-label reveal">Возможности</div>
+    <div class="features-grid">
+
+      <div class="feature-card big reveal">
+        <div>
+          <div class="feature-tag"><span class="feature-tag-dot"></span>Главное</div>
+          <h3 class="feature-title">Лента событий рядом с тобой</h3>
+          <p class="feature-desc">Фильтруй по типу активности, дате, городу и стоимости. Видишь только то, что тебе подходит — сегодня, сейчас, рядом.</p>
+        </div>
+        <div class="feature-visual">
+          <div class="phone-mock" style="width:220px; border-radius:30px; padding:18px 14px;">
+            <div class="phone-notch" style="margin-bottom:14px;"></div>
+            <div class="event-card-mock" style="padding:12px;">
+              <div class="ecm-tag sport">Спорт</div>
+              <p class="ecm-title" style="font-size:12px;">Пробежка в парке</p>
+              <p class="ecm-meta" style="font-size:10px;">Сб 8:00 · 4/8 чел.</p>
+              <button class="ecm-btn" style="font-size:10px; padding:5px;">Иду →</button>
+            </div>
+            <div class="event-card-mock" style="padding:12px;">
+              <div class="ecm-tag cinema">Кино</div>
+              <p class="ecm-title" style="font-size:12px;">Дюна 3 · Мираж</p>
+              <p class="ecm-meta" style="font-size:10px;">Пт 19:30 · 2/4 чел.</p>
+              <button class="ecm-btn" style="font-size:10px; padding:5px;">Иду →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-tag"><span class="feature-tag-dot"></span>Чат</div>
+        <h3 class="feature-title">Чат сразу в Telegram</h3>
+        <p class="feature-desc">Нажал «Иду» — получил ссылку на группу. Никаких лишних аккаунтов, просто Telegram который уже у всех есть.</p>
+      </div>
+
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <div class="feature-tag"><span class="feature-tag-dot"></span>Профиль</div>
+        <h3 class="feature-title">Твоя история активностей</h3>
+        <p class="feature-desc">Созданные ивенты, посещённые события, сохранённые люди. Рейтинг который растёт с каждым выходом.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-tag"><span class="feature-tag-dot"></span>Приватность</div>
+        <h3 class="feature-title">Публичные и приватные ивенты</h3>
+        <p class="feature-desc">Хочешь — открытое событие для всех. Хочешь — приватное только для своих с доступом по ссылке.</p>
+      </div>
+
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <div class="feature-tag"><span class="feature-tag-dot"></span>Гибкость</div>
+        <h3 class="feature-title">Платные и бесплатные события</h3>
+        <p class="feature-desc">Укажи стоимость участия — для платных ивентов, мастер-классов или совместных поездок. Или ставь 0 и зови всех.</p>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="section-label reveal">Категории</div>
+  <div class="categories-grid reveal">
+    <div class="cat-pill"><span class="cat-emoji">🏃</span> Бег и фитнес</div>
+    <div class="cat-pill"><span class="cat-emoji">🎬</span> Кино</div>
+    <div class="cat-pill"><span class="cat-emoji">⛺</span> Походы</div>
+    <div class="cat-pill"><span class="cat-emoji">🍜</span> Еда</div>
+    <div class="cat-pill"><span class="cat-emoji">🎲</span> Настолки</div>
+    <div class="cat-pill"><span class="cat-emoji">🚴</span> Велопрогулки</div>
+    <div class="cat-pill"><span class="cat-emoji">🎵</span> Концерты</div>
+    <div class="cat-pill"><span class="cat-emoji">🧘</span> Йога</div>
+    <div class="cat-pill"><span class="cat-emoji">🎨</span> Творчество</div>
+    <div class="cat-pill"><span class="cat-emoji">🏊</span> Плавание</div>
+    <div class="cat-pill"><span class="cat-emoji">📚</span> Книжный клуб</div>
+    <div class="cat-pill"><span class="cat-emoji">➕</span> И многое другое</div>
+  </div>
+</section>
+
+<!-- PREMIUM -->
+<section class="premium-section">
+  <div class="premium-card reveal">
+    <div class="premium-bg"></div>
+    <div style="position:relative;">
+      <p class="premium-label">Idu Premium</p>
+      <h2 class="premium-title">Больше событий.<br>Больше людей.</h2>
+      <p class="premium-desc">Снимай лимиты и организуй столько ивентов, сколько хочешь — с любым количеством участников.</p>
+      <button class="btn-dark">Попробовать · от $2/мес <span style="font-size:18px;">→</span></button>
+    </div>
+    <div class="premium-perks" style="position:relative;">
+      <div class="perk">
+        <span class="perk-icon">∞</span>
+        <div>
+          <p class="perk-text">Неограниченные ивенты</p>
+          <p class="perk-sub">Без лимита на одновременные события</p>
+        </div>
+      </div>
+      <div class="perk">
+        <span class="perk-icon">👥</span>
+        <div>
+          <p class="perk-text">Больше участников</p>
+          <p class="perk-sub">Снимай ограничение на количество мест</p>
+        </div>
+      </div>
+      <div class="perk">
+        <span class="perk-icon">⚡</span>
+        <div>
+          <p class="perk-text">Продвижение в ленте</p>
+          <p class="perk-sub">Твои ивенты выше в выдаче</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="section">
+  <div class="stats-grid">
+    <div class="stat-card reveal">
+      <div class="stat-num">10+</div>
+      <p class="stat-label">категорий<br>активностей</p>
+    </div>
+    <div class="stat-card reveal" style="transition-delay:0.1s">
+      <div class="stat-num">0₽</div>
+      <p class="stat-label">чтобы начать<br>и найти компанию</p>
+    </div>
+    <div class="stat-card reveal" style="transition-delay:0.2s">
+      <div class="stat-num">СНГ</div>
+      <p class="stat-label">доступно везде<br>где есть ты</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-section">
+  <div class="final-glow"></div>
+  <h2 class="final-title reveal">
+    Хватит ходить<br>
+    <span class="accent">одному</span>
+  </h2>
+  <p class="final-sub reveal">Первый шаг простой — войди через Telegram и посмотри что происходит рядом прямо сейчас.</p>
+  <div class="final-actions reveal">
+    <a href="#" class="btn-primary">
+      Найти ивент
+      <span class="btn-arrow">→</span>
+    </a>
+    <a href="#" class="tg-badge">
+      <span class="tg-icon">✈</span>
+      Наш Telegram
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">idu<span>.</span></div>
+  <div class="footer-links">
+    <a href="#">О проекте</a>
+    <a href="#">Для бизнеса</a>
+    <a href="#">Поддержка</a>
+  </div>
+  <div class="footer-copy">&copy; 2025 Idu</div>
+</footer>
+
+<script>
+  // Scroll reveal with IntersectionObserver
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
