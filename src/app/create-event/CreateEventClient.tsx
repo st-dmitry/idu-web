@@ -9,6 +9,11 @@ import {
   uploadEventPhoto,
   getCategories,
 } from "@/lib/api";
+import dynamic from "next/dynamic";
+
+const LocationPicker = dynamic(() => import("@/components/LocationPicker"), {
+  ssr: false,
+});
 
 export default function CreateEventClient() {
   const { user, token } = useAuth();
@@ -22,10 +27,13 @@ export default function CreateEventClient() {
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<number | undefined>(undefined);
+  const [categorySearch, setCategorySearch] = useState("");
   const [startTime, setStartTime] = useState("");
   const [city, setCity] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [description, setDescription] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState(10);
+  const [maxParticipantsStr, setMaxParticipantsStr] = useState("10");
   const [cost, setCost] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -47,6 +55,13 @@ export default function CreateEventClient() {
     }
     if (!title.trim() || !startTime) return;
 
+    const eventDate = new Date(startTime);
+    const minDate = new Date(Date.now() + 60 * 60 * 1000);
+    if (eventDate < minDate) {
+      setError("Событие можно создать минимум за час до начала");
+      return;
+    }
+
     setSaving(true);
     setError(null);
 
@@ -56,9 +71,11 @@ export default function CreateEventClient() {
           title: title.trim(),
           category,
           startTime: new Date(startTime).toISOString(),
+          latitude,
+          longitude,
           city: city.trim() || null,
           description: description.trim() || null,
-          maxParticipants,
+          maxParticipants: Number(maxParticipantsStr) || 10,
           cost: cost ? Number(cost) : null,
           isPublic: true,
         },
@@ -133,28 +150,60 @@ export default function CreateEventClient() {
               <label className="block text-sm font-medium mb-2">
                 Категория
               </label>
-              <div className="space-y-3">
-                {categoryGroups.map((group) => (
-                  <div key={group.id}>
-                    <p className="text-xs text-text-secondary mb-1.5">{group.name}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {group.categories?.map((cat) => (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => setCategory(cat.id)}
-                          className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
-                            category === cat.id
-                              ? "bg-accent text-white shadow-sm"
-                              : "bg-bg-alt text-text hover:bg-border"
-                          }`}
-                        >
-                          {cat.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <div className="relative mb-3">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-secondary"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  placeholder="Поиск категории..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-bg-alt text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
+                />
+              </div>
+              <div className="space-y-3 max-h-[240px] overflow-y-auto">
+                {categoryGroups
+                  .map((group) => {
+                    const filtered = group.categories?.filter((cat) =>
+                      !categorySearch ||
+                      (cat.name ?? "").toLowerCase().includes(categorySearch.toLowerCase())
+                    );
+                    if (!filtered || filtered.length === 0) return null;
+                    return (
+                      <div key={group.id}>
+                        <p className="text-xs text-text-secondary mb-1.5">{group.name}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {filtered.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setCategory(cat.id)}
+                              className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
+                                category === cat.id
+                                  ? "bg-accent text-white shadow-sm"
+                                  : "bg-bg-alt text-text hover:bg-border"
+                              }`}
+                            >
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                  .filter(Boolean)}
               </div>
             </div>
 
@@ -167,24 +216,23 @@ export default function CreateEventClient() {
                 type="datetime-local"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border bg-bg-alt text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
+                min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)}
+                className="w-full min-w-0 max-w-full px-4 py-3 rounded-xl border border-border bg-bg-alt text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
                 required
               />
             </div>
 
-            {/* City */}
-            <div>
-              <label className="block text-sm font-medium mb-1.5">
-                Город
-              </label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Минск"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-bg-alt text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
-              />
-            </div>
+            {/* Location */}
+            <LocationPicker
+              latitude={latitude}
+              longitude={longitude}
+              city={city}
+              onLocationChange={(loc) => {
+                setLatitude(loc.latitude);
+                setLongitude(loc.longitude);
+                setCity(loc.city);
+              }}
+            />
 
             {/* Description */}
             <div>
@@ -211,8 +259,8 @@ export default function CreateEventClient() {
                   type="number"
                   min={2}
                   max={1000}
-                  value={maxParticipants}
-                  onChange={(e) => setMaxParticipants(Number(e.target.value))}
+                  value={maxParticipantsStr}
+                  onChange={(e) => setMaxParticipantsStr(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-border bg-bg-alt text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
                 />
               </div>

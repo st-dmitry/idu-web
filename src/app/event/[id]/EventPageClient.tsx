@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { joinEvent, leaveEvent } from "@/lib/api";
 import AuthModal from "@/components/AuthModal";
 
 const AVATAR_COLORS = [
@@ -17,21 +19,57 @@ interface Participant {
 }
 
 interface EventPageClientProps {
+  eventId: string;
+  creatorUserId: string;
+  isJoinedByMe: boolean;
   currentPeople: number;
   maxPeople: number;
   participants: Participant[];
+  onJoinChange?: () => void;
 }
 
 export default function EventPageClient({
-  currentPeople,
+  eventId,
+  creatorUserId,
+  isJoinedByMe: initialIsJoined,
+  currentPeople: initialCurrentPeople,
   maxPeople,
   participants,
+  onJoinChange,
 }: EventPageClientProps) {
+  const { user, token, isLoading } = useAuth();
   const [authOpen, setAuthOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isJoined, setIsJoined] = useState(initialIsJoined);
+  const [currentPeople, setCurrentPeople] = useState(initialCurrentPeople);
+  const [joining, setJoining] = useState(false);
 
-  const handleJoin = () => {
-    setAuthOpen(true);
+  const isOwner = !!user && user.id === creatorUserId;
+
+  const handleJoin = async () => {
+    if (!token || !user) {
+      setAuthOpen(true);
+      return;
+    }
+    if (isOwner) return;
+
+    setJoining(true);
+    try {
+      if (isJoined) {
+        await leaveEvent(eventId, token);
+        setIsJoined(false);
+        setCurrentPeople((c) => Math.max(0, c - 1));
+      } else {
+        await joinEvent(eventId, token);
+        setIsJoined(true);
+        setCurrentPeople((c) => c + 1);
+      }
+      onJoinChange?.();
+    } catch (err) {
+      console.error("Join/leave failed:", err);
+    } finally {
+      setJoining(false);
+    }
   };
 
   const handleShare = async () => {
@@ -91,16 +129,33 @@ export default function EventPageClient({
           })}
         </ul>
 
-        {/* Join button */}
-        <button
-          onClick={handleJoin}
-          className="w-full bg-accent hover:bg-accent-hover text-white rounded-xl py-4 font-semibold text-base transition-all hover:scale-[1.01] cursor-pointer"
-        >
-          Иду &rarr;
-        </button>
-        <p className="text-xs text-text-secondary text-center mt-2.5">
-          Нужен аккаунт &middot; вход через Telegram
-        </p>
+        {/* Join / Leave / Owner button */}
+        {isOwner ? (
+          <div className="w-full bg-bg-alt text-text-secondary rounded-xl py-4 font-semibold text-base text-center">
+            Ваше событие
+          </div>
+        ) : isJoined ? (
+          <button
+            onClick={handleJoin}
+            disabled={joining}
+            className="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl py-4 font-semibold text-base transition-all cursor-pointer disabled:opacity-50"
+          >
+            {joining ? "..." : "Выйти"}
+          </button>
+        ) : (
+          <button
+            onClick={handleJoin}
+            disabled={joining}
+            className="w-full bg-accent hover:bg-accent-hover text-white rounded-xl py-4 font-semibold text-base transition-all hover:scale-[1.01] cursor-pointer disabled:opacity-50"
+          >
+            {joining ? "..." : "Иду →"}
+          </button>
+        )}
+        {!token && !isLoading && (
+          <p className="text-xs text-text-secondary text-center mt-2.5">
+            Нужен аккаунт &middot; вход через Telegram
+          </p>
+        )}
 
         {/* Share button */}
         <button
@@ -125,39 +180,41 @@ export default function EventPageClient({
         </button>
       </div>
 
-      {/* Bottom banner */}
-      <section className="col-span-full mt-16 -mx-6 md:-mx-12 px-6 md:px-12 py-12 bg-accent-light rounded-none">
-        <div className="max-w-[1200px] mx-auto text-center">
-          <h3 className="font-heading font-bold text-2xl mb-2">
-            Хочешь присоединиться?
-          </h3>
-          <p className="text-text-secondary mb-6">
-            Создай аккаунт за 10 секунд
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              onClick={handleJoin}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold transition-colors cursor-pointer"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
+      {/* Bottom banner — only show for unauthenticated users */}
+      {!token && !isLoading && (
+        <section className="col-span-full mt-16 -mx-6 md:-mx-12 px-6 md:px-12 py-12 bg-accent-light rounded-none">
+          <div className="max-w-[1200px] mx-auto text-center">
+            <h3 className="font-heading font-bold text-2xl mb-2">
+              Хочешь присоединиться?
+            </h3>
+            <p className="text-text-secondary mb-6">
+              Создай аккаунт за 10 секунд
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={handleJoin}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-white rounded-xl font-semibold transition-colors cursor-pointer"
               >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.81-1.6 4.6-1.87 5.12-1.88.11 0 .37.03.53.17.14.12.18.28.2.45-.01.06.01.24 0 .38z" />
-              </svg>
-              Войти через Telegram
-            </button>
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-xl font-semibold text-text hover:bg-white transition-colors cursor-pointer"
-            >
-              Скачать приложение
-            </button>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.99-1.74 6.65-2.89 7.99-3.44 3.81-1.6 4.6-1.87 5.12-1.88.11 0 .37.03.53.17.14.12.18.28.2.45-.01.06.01.24 0 .38z" />
+                </svg>
+                Войти через Telegram
+              </button>
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-2 px-6 py-3 border border-border rounded-xl font-semibold text-text hover:bg-white transition-colors cursor-pointer"
+              >
+                Скачать приложение
+              </button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Auth modal */}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />

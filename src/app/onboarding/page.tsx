@@ -11,7 +11,6 @@ const GENDER_OPTIONS = [
   { value: Gender.Female, label: "Женский" },
 ];
 
-const MAX_INTERESTS = 5;
 
 export default function OnboardingPage() {
   const { user, token, clearNewUser, refreshUser } = useAuth();
@@ -34,7 +33,7 @@ export default function OnboardingPage() {
   function toggleInterest(interest: number) {
     setSelectedInterests((prev) => {
       if (prev.includes(interest)) return prev.filter((i) => i !== interest);
-      if (prev.length >= MAX_INTERESTS) return prev;
+
       return [...prev, interest];
     });
   }
@@ -73,8 +72,8 @@ export default function OnboardingPage() {
         />
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="bg-white rounded-3xl shadow-sm border border-border p-8 md:p-12 max-w-[540px] w-full">
+      <div className="flex-1 flex items-center justify-center px-6 py-12 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-border p-8 md:p-12 max-w-[540px] w-full max-h-full overflow-y-auto">
           {step === 1 ? (
             <>
               <div className="text-center mb-8">
@@ -82,8 +81,7 @@ export default function OnboardingPage() {
                   Что тебе интересно?
                 </h1>
                 <p className="text-text-secondary text-sm">
-                  Выбери до {MAX_INTERESTS} интересов — мы подберём подходящие
-                  события
+                  Выбери интересы — мы подберём подходящие события
                 </p>
               </div>
 
@@ -101,9 +99,7 @@ export default function OnboardingPage() {
                             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                               selected
                                 ? "bg-accent text-white shadow-sm"
-                                : selectedInterests.length >= MAX_INTERESTS
-                                  ? "bg-bg-alt text-text-secondary/40 cursor-not-allowed"
-                                  : "bg-bg-alt text-text hover:bg-border"
+                                : "bg-bg-alt text-text hover:bg-border"
                             }`}
                           >
                             {interest.name}
@@ -117,7 +113,7 @@ export default function OnboardingPage() {
 
               <div className="flex items-center justify-between">
                 <span className="text-xs text-text-secondary">
-                  {selectedInterests.length} / {MAX_INTERESTS}
+                  {selectedInterests.length} выбрано
                 </span>
                 <button
                   onClick={() => setStep(2)}

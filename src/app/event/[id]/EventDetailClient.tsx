@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import {
   type EventResponse,
@@ -143,13 +144,27 @@ export default function EventDetailClient() {
 
           <p className="text-sm text-text-secondary mb-4">
             Организатор:{" "}
-            <span className="font-semibold text-text">
+            <Link
+              href={`/user/${event.creatorUserId}`}
+              className="font-semibold text-text hover:text-accent transition-colors no-underline"
+            >
               {event.creatorName ?? "Неизвестно"}
-            </span>
+            </Link>
           </p>
 
           <PriceBadge price={event.cost} />
         </header>
+
+        {/* Event photo */}
+        {event.photoPath && (
+          <div className="mb-10 rounded-2xl overflow-hidden">
+            <img
+              src={event.photoPath.startsWith("http") ? event.photoPath : `${(process.env.NEXT_PUBLIC_API_URL || "").replace("/api", "")}${event.photoPath}`}
+              alt={event.title ?? "Фото события"}
+              className="w-full max-h-[400px] object-cover"
+            />
+          </div>
+        )}
 
         {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 items-start">
@@ -169,6 +184,9 @@ export default function EventDetailClient() {
 
           {/* Right column */}
           <EventPageClient
+            eventId={event.id}
+            creatorUserId={event.creatorUserId}
+            isJoinedByMe={event.isJoinedByMe}
             currentPeople={event.currentParticipants}
             maxPeople={event.maxParticipants}
             participants={[]}

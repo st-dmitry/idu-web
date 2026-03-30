@@ -243,7 +243,7 @@ export async function uploadEventPhoto(
     body: form,
   });
   if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
-  return res.json();
+  return res.text();
 }
 
 export function joinEvent(eventId: string, token: string): Promise<void> {

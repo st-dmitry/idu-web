@@ -90,7 +90,7 @@ function EventRow({ event, categoryLabels, categoryColors }: {
         {" "}&middot; {event.currentParticipants}/{event.maxParticipants} чел.
         {event.cost === 0 || event.cost === null
           ? " · бесплатно"
-          : ` · ${event.cost}\u20BD`}
+          : ` · ${event.cost} BYN`}
       </p>
     </Link>
   );

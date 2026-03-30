@@ -95,7 +95,7 @@ export default function EventsMap({
       const price =
         event.cost === null || event.cost === 0
           ? "бесплатно"
-          : `${event.cost}\u20BD`;
+          : `${event.cost} BYN`;
 
       const popup = `
         <div style="min-width:180px;font-family:sans-serif;">

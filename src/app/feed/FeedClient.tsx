@@ -285,6 +285,7 @@ export default function FeedClient() {
                 currentPeople={event.currentParticipants}
                 maxPeople={event.maxParticipants}
                 price={event.cost ?? 0}
+                isJoined={event.isJoinedByMe}
               />
             ))}
           </div>

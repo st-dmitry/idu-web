@@ -75,14 +75,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Listen for Telegram OAuth callback message
   useEffect(() => {
+    // Log ALL incoming messages so we can see what Telegram actually sends
+    function debugAllMessages(event: MessageEvent) {
+      console.log("[TG Auth] postMessage received:", {
+        origin: event.origin,
+        data: event.data,
+        type: typeof event.data,
+      });
+    }
+
     async function handleMessage(event: MessageEvent) {
-      if (event.origin !== "https://oauth.telegram.org") return;
+      const trusted = [
+        "https://oauth.telegram.org",
+        "https://oauth.tg.dev",
+      ];
+
+      if (!trusted.includes(event.origin)) {
+        return;
+      }
+
+      console.log("[TG Auth] Trusted message from Telegram, processing...");
 
       try {
-        const data =
-          typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        const raw = event.data;
+        const parsed =
+          typeof raw === "string" ? JSON.parse(raw) : raw;
 
-        if (!data?.id || !data?.hash) return;
+        console.log("[TG Auth] Parsed data:", parsed);
+
+        // Telegram wraps auth data in { event: "auth_result", result: { id, hash, ... } }
+        const data = parsed?.result ?? parsed;
+
+        if (!data?.id || !data?.hash) {
+          console.warn("[TG Auth] Missing id or hash in data");
+          return;
+        }
 
         const telegramData: TelegramAuthRequest = {
           telegramId: data.id,
@@ -93,7 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           authDate: data.auth_date,
         };
 
+        console.log("[TG Auth] Calling authTelegram API...");
         const authResponse = await authTelegram(telegramData);
+        console.log("[TG Auth] authTelegram response:", authResponse);
 
         if (!authResponse.token) {
           throw new Error("No token received");
@@ -103,15 +132,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsNewUser(true);
         }
 
+        console.log("[TG Auth] Calling getMe...");
         const profile = await getMe(authResponse.token);
+        console.log("[TG Auth] Profile received:", profile);
         saveSession(authResponse.token, profile);
+        console.log("[TG Auth] Session saved, auth complete!");
       } catch (err) {
-        console.error("Auth failed:", err);
+        console.error("[TG Auth] Auth failed:", err);
       }
     }
 
+    // Fallback: Telegram redirects back with auth data in URL hash
+    function handleHashCallback() {
+      const hash = window.location.hash;
+      console.log("[TG Auth] Checking hash:", hash || "(empty)");
+
+      if (!hash.startsWith("#tgAuthResult=")) return;
+
+      console.log("[TG Auth] Found #tgAuthResult in hash!");
+
+      try {
+        const encoded = hash.slice("#tgAuthResult=".length);
+        const json = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
+        const data = JSON.parse(json);
+        console.log("[TG Auth] Decoded hash data:", data);
+        handleMessage({
+          origin: "https://oauth.telegram.org",
+          data,
+        } as MessageEvent);
+      } catch (err) {
+        console.error("[TG Auth] Hash decode failed:", err);
+      } finally {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }
+
+    window.addEventListener("message", debugAllMessages);
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    handleHashCallback();
+
+    console.log("[TG Auth] Listeners registered, waiting for Telegram callback...");
+
+    return () => {
+      window.removeEventListener("message", debugAllMessages);
+      window.removeEventListener("message", handleMessage);
+    };
   }, [saveSession]);
 
   const loginWithTelegram = useCallback(() => {
@@ -126,8 +191,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
 
+    const returnTo = window.location.origin + "/auth";
     window.open(
-      `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&request_access=write`,
+      `https://oauth.telegram.org/auth?bot_id=${botId}&origin=${encodeURIComponent(window.location.origin)}&return_to=${encodeURIComponent(returnTo)}&request_access=write`,
       "telegram-login",
       `width=${width},height=${height},left=${left},top=${top}`
     );
